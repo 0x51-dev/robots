@@ -1,0 +1,40 @@
+robotstxt = *(group / sitemap / others / emptyline)
+group = startgroupline
+        *(startgroupline / emptyline)
+        *(rule / emptyline)
+
+user-agent = "user-agent" / "User-agent" / "User-Agent" ; TODO: case-insensitive?
+startgroupline = *WS user-agent *WS ":" *WS product-token EOL
+type = allow / disallow
+allow = "allow" / "Allow"          ; TODO: case-insensitive?
+disallow = "disallow" / "Disallow" ; TODO: case-insensitive?
+rule = *WS type *WS ":" *WS (path-pattern / empty-pattern) EOL
+
+; Sitemap Support
+sitemap = *WS sitemap-prefix *WS ":" *WS sitemap-url EOL
+sitemap-prefix = "sitemap" / "Sitemap" ; TODO: case-insensitive?
+sitemap-url = *UTF8-char-noctl
+
+; Allow others.
+others = *WS identifier *WS ":" *WS others-text EOL
+others-text = *UTF8-char-noctl
+
+product-token = identifier / "*"
+path-pattern = ("/" / "*") *UTF8-char-noctl
+empty-pattern = *WS
+identifier = 1*(%x2D / %x41-5A / %x5F / %x61-7A)
+comment = "#" *(UTF8-char-noctl / WS / "#")
+emptyline = EOL
+
+EOL = *WS [comment] NL
+NL = %x0D / %x0A / %x0D.0A
+WS = %x20 / %x09
+
+UTF8-char-noctl = UTF8-1-noctl / UTF8-2 / UTF8-3 / UTF8-4
+UTF8-1-noctl = %x21 / %x22 / %x24-7F
+UTF8-2 = %xC2-DF UTF8-tail
+UTF8-3 = %xE0 %xA0-BF UTF8-tail / %xE1-EC 2UTF8-tail /
+         %xED %x80-9F UTF8-tail / %xEE-EF 2UTF8-tail
+UTF8-4 = %xF0 %x90-BF 2UTF8-tail / %xF1-F3 3UTF8-tail /
+         %xF4 %x80-8F 2UTF8-tail
+UTF8-tail = %x80-BF
